@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import "./TestArea.css";
 import { problems } from "./problems";
+import { auth } from "../firebase";
+import { signOut } from "firebase/auth";
+import { useAuth } from "../context/AuthContext";
+
 
 function TestArea() {
   const [selectedProblem, setSelectedProblem] = useState(problems[0]);
@@ -24,6 +28,8 @@ function TestArea() {
   const startTimeRef = useRef(null);
   const finishTimeRef = useRef(null);
   const autoInsertedRef = useRef(0);
+  const { user } = useAuth();
+
 
   // ---- PROBLEM CHANGE ----
   const changeProblem = (e) => {
@@ -136,14 +142,25 @@ function TestArea() {
 
   return (
     <div className="app-container">
-      <nav className="navbar">
-        <div className="nav-logo">⚙️ Ansh Kanyadi</div>
-        <div className="nav-links">
-          <a>Problems</a>
-          <a>Account</a>
-          <a>Leaderboard</a>
-        </div>
-      </nav>
+    <nav className="navbar">
+  <div className="nav-logo">
+    {user ? `⚙️ ${user.email}` : "⚙️ Loading..."}
+  </div>
+
+  <div className="nav-links">
+    <a href="#">Problems</a>
+    <a href="#">Account</a>
+    <a href="#">Leaderboard</a>
+
+    {user && (
+      <button className="logout-btn" onClick={() => signOut(auth)}>
+        Logout
+      </button>
+    )}
+  </div>
+</nav>
+
+
 
       <div className="test-wrapper">
         {/* ✅ PROBLEM DROPDOWN */}
