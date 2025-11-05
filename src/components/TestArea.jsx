@@ -4,7 +4,9 @@ import { problems } from "./problems";
 import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
 import { useAuth } from "../context/AuthContext";
+import { db } from "../firebase";
 
+import { doc, setDoc, collection, addDoc, getDoc } from "firebase/firestore";
 
 function TestArea() {
   const [selectedProblem, setSelectedProblem] = useState(problems[0]);
@@ -28,10 +30,38 @@ function TestArea() {
   const startTimeRef = useRef(null);
   const finishTimeRef = useRef(null);
   const autoInsertedRef = useRef(0);
+
   const { user } = useAuth();
+  
+  async function saveResult() {
+    if (!user) return;
+  
+    const wpmValue = Number(wpm);
+    const accValue = Number(accuracy);
+  
+    // ✅ Save every score for account history
+    await addDoc(collection(db, "userScores"), {
+      uid: user.uid,
+      email: user.email,
+      wpm: wpmValue,
+      accuracy: accValue,
+      timestamp: Date.now()
+    });
+  
+    // ✅ Update leaderboard only if this score is higher
+    const userRef = doc(db, "leaderboard", user.uid);
+    const prev = await getDoc(userRef);
+  
+    if (!prev.exists() || wpmValue > prev.data().wpm) {
+      await setDoc(userRef, {
+        email: user.email,
+        wpm: wpmValue,
+        accuracy: accValue,
+        updatedAt: Date.now()
+      });
+    }
+  }
 
-
-  // ---- PROBLEM CHANGE ----
   const changeProblem = (e) => {
     const chosen = problems.find(p => p.id === e.target.value);
     setSelectedProblem(chosen);
@@ -55,9 +85,10 @@ function TestArea() {
     }
   }, []);
 
-  // ---- TIMER ----
+  // ⏲ Timer
   useEffect(() => {
     if (!started || finished) return;
+
     timerRef.current = setInterval(() => {
       setTime((t) => {
         if (t <= 1) {
@@ -69,10 +100,11 @@ function TestArea() {
         return t - 1;
       });
     }, 1000);
+
     return () => clearInterval(timerRef.current);
   }, [started, finished]);
 
-  // ---- UPDATE STATS ----
+  // 📊 Update WPM & Accuracy
   useEffect(() => {
     const now = finished && finishTimeRef.current ? finishTimeRef.current : Date.now();
     const elapsedSec = startTimeRef.current
@@ -90,7 +122,7 @@ function TestArea() {
     setWpm(wpmCalc.toFixed(1));
   }, [input, text, finished]);
 
-  // ---- FINISH WHEN REACH END ----
+  // ✅ Finish when typed to end
   useEffect(() => {
     if (!finished && cursor >= text.length) {
       clearInterval(timerRef.current);
@@ -98,6 +130,13 @@ function TestArea() {
       if (!finishTimeRef.current) finishTimeRef.current = Date.now();
     }
   }, [cursor, finished, text.length]);
+
+  // ✅ Save AFTER stats ready
+  useEffect(() => {
+    if (finished) {
+      saveResult();
+    }
+  }, [finished, wpm, accuracy]);
 
   const handleChange = (e) => {
     if (!started) {
@@ -142,28 +181,22 @@ function TestArea() {
 
   return (
     <div className="app-container">
-    <nav className="navbar">
-  <div className="nav-logo">
-    {user ? `⚙️ ${user.email}` : "⚙️ Loading..."}
-  </div>
+      <nav className="navbar">
+        <div className="nav-logo">{user ? `⚙️ ${user.email}` : "⚙️ Loading..."}</div>
 
-  <div className="nav-links">
-    <a href="#">Problems</a>
-    <a href="#">Account</a>
-    <a href="#">Leaderboard</a>
+        <div className="nav-links">
+          <a href="https://www.linkedin.com/in/herbert-seto-0b199a376/?lipi=urn%3Ali%3Apage%3Ad_flagship3_people%3B56n7T9sXRO%2B99ukj%2BNW%2ByA%3D%3D">Problems</a>
+          <a href="/account">Account</a>
+          <a href="/leaderboard">Leaderboard</a>
 
-    {user && (
-      <button className="logout-btn" onClick={() => signOut(auth)}>
-        Logout
-      </button>
-    )}
-  </div>
-</nav>
-
-
+          {user && (
+            <button className="logout-btn" onClick={() => signOut(auth)}>Logout</button>
+          )}
+        </div>
+      </nav>
 
       <div className="test-wrapper">
-        {/* ✅ PROBLEM DROPDOWN */}
+
         <select className="problem-select" onChange={changeProblem} value={selectedProblem.id}>
           {problems.map(p => (
             <option key={p.id} value={p.id}>{p.title}</option>
@@ -185,7 +218,6 @@ function TestArea() {
               <div ref={caretRef} className={`caret ${isIdle ? "blink" : "solid"}`} />
             </div>
 
-            {/* ✅ TYPING FIELD */}
             <textarea
               ref={inputRef}
               value={input}
@@ -194,7 +226,6 @@ function TestArea() {
                 const el = e.target;
                 const pos = el.selectionStart;
 
-                // TAB skip whitespace
                 if (e.key === "Tab" && pos === input.length) {
                   e.preventDefault();
                   const rest = text.slice(pos);
@@ -205,21 +236,17 @@ function TestArea() {
                     setInput(input + insert);
                     setCursor(newPos);
                     autoInsertedRef.current += insert.length;
-                    requestAnimationFrame(() =>
-                      el.setSelectionRange(newPos, newPos)
-                    );
+                    requestAnimationFrame(() => el.setSelectionRange(newPos, newPos));
                   }
                   return;
                 }
 
-                // ENTER keep indent
                 if (e.key === "Enter") {
                   e.preventDefault();
                   const value = el.value;
                   const lineStart = value.lastIndexOf("\n", pos - 1) + 1;
                   const line = value.slice(lineStart, pos);
-                  const indentMatch = line.match(/^(\s+)/);
-                  const indent = indentMatch ? indentMatch[1] : "";
+                  const indent = (line.match(/^(\s+)/) || ["", ""])[1];
                   const newVal = value.slice(0, pos) + "\n" + indent + value.slice(pos);
                   const newPos = pos + 1 + indent.length;
 

@@ -1,0 +1,33 @@
+.leaderboard-container {
+    max-width: 450px;
+    margin: 120px auto;
+    padding: 2rem;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    color: #e6edf3;
+    font-family: "Fira Code", monospace;
+  }
+  
+  .leaderboard-container h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+    color: #3b82f6;
+  }
+  
+  .leaderboard-entry {
+    padding: 8px;
+    border-bottom: 1px solid #30363d;
+  }
+  
+  .leaderboard-entry:last-child {
+    border-bottom: none;
+  }
+  
+  .leaderboard-rank {
+    color: #3b82f6;
+    font-weight: bold;
+    margin-right: 6px;
+  }
+  

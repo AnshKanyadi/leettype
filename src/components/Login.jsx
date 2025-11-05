@@ -29,13 +29,10 @@ export default function Login() {
   return (
     <div className="auth-container">
       <h2>Login</h2>
-
       <input placeholder="Email" value={email} onChange={(e)=>setEmail(e.target.value)} />
       <input placeholder="Password" type="password" value={password} onChange={(e)=>setPassword(e.target.value)} />
-
       <button onClick={loginEmail}>Login</button>
       <button onClick={loginGoogle}>Sign in with Google</button>
-
       <p>Don't have an account? <Link to="/signup">Sign Up</Link></p>
     </div>
   );
