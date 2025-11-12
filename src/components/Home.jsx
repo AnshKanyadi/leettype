@@ -18,7 +18,7 @@ export default function Home() {
 
         <div className="home-buttons">
           <Link className="primary-btn" to="/signup">Start Typing</Link>
-          <Link className="secondary-btn" to="/leaderboard">Leaderboard</Link>
+          <Link className="secondary-btn" to="/leaderboards">Leaderboard</Link>
         </div>
 
         <p className="credit">
