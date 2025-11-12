@@ -1,16 +1,18 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import "./TestArea.css";
-import { problems } from "./problems";
-import { auth } from "../firebase";
+import { problems } from "./problemsData";
+import { auth, db } from "../firebase";
 import { signOut } from "firebase/auth";
 import { useAuth } from "../context/AuthContext";
-import { db } from "../firebase";
-
+import { useParams } from "react-router-dom";
 import { doc, setDoc, collection, addDoc, getDoc } from "firebase/firestore";
 
 function TestArea() {
-  const [selectedProblem, setSelectedProblem] = useState(problems[0]);
-  const [text, setText] = useState(selectedProblem.solution);
+  const { user } = useAuth();
+  const { id } = useParams(); // /app/:id
+
+  const [selectedProblem, setSelectedProblem] = useState(null);
+  const [text, setText] = useState("");
 
   const [input, setInput] = useState("");
   const [cursor, setCursor] = useState(0);
@@ -31,64 +33,70 @@ function TestArea() {
   const finishTimeRef = useRef(null);
   const autoInsertedRef = useRef(0);
 
-  const { user } = useAuth();
-  
+  // ---------- load problem from URL and reset ----------
+  useEffect(() => {
+    const p = problems.find((x) => x.id === id);
+    setSelectedProblem(p || null);
+    setText(p?.solution || "");
+    // full reset
+    setInput("");
+    setCursor(0);
+    setStarted(false);
+    setFinished(false);
+    setTime(totalTime);
+    setWpm("0.0");
+    setAccuracy("100.0");
+    autoInsertedRef.current = 0;
+    startTimeRef.current = null;
+    finishTimeRef.current = null;
+    setIsIdle(true);
+    charRefs.current = [];
+    // focus after a tick
+    setTimeout(() => inputRef.current?.focus(), 0);
+  }, [id]);
+
+  // ---------- save result ----------
   async function saveResult() {
-    if (!user) return;
+    if (!user || !id) return;
   
     const wpmValue = Number(wpm);
     const accValue = Number(accuracy);
+    console.log("Saving result for:", id, wpmValue, accValue);
   
-    // ✅ Save every score for account history
-    await addDoc(collection(db, "userScores"), {
-      uid: user.uid,
-      email: user.email,
-      wpm: wpmValue,
-      accuracy: accValue,
-      timestamp: Date.now()
-    });
-  
-    // ✅ Update leaderboard only if this score is higher
-    const userRef = doc(db, "leaderboard", user.uid);
-    const prev = await getDoc(userRef);
-  
-    if (!prev.exists() || wpmValue > prev.data().wpm) {
-      await setDoc(userRef, {
+    try {
+      // Save attempt history
+      await addDoc(collection(db, "userScores"), {
+        uid: user.uid,
         email: user.email,
+        problemId: id,
         wpm: wpmValue,
         accuracy: accValue,
-        updatedAt: Date.now()
+        timestamp: Date.now(),
       });
+  
+      // Per-problem leaderboard (best only)
+      const userRef = doc(db, `leaderboard_${id}`, user.uid);
+      const prev = await getDoc(userRef);
+  
+      if (!prev.exists() || wpmValue > prev.data().wpm) {
+        await setDoc(userRef, {
+          email: user.email,
+          wpm: wpmValue,
+          accuracy: accValue,
+          updatedAt: Date.now(),
+        });
+        console.log("Leaderboard updated for:", id);
+      } else {
+        console.log("Did not beat previous WPM, skipping update.");
+      }
+    } catch (err) {
+      console.error("❌ Error saving result:", err);
     }
   }
-
-  const changeProblem = (e) => {
-    const chosen = problems.find(p => p.id === e.target.value);
-    setSelectedProblem(chosen);
-    setText(chosen.solution);
-    restartTest();
-  };
-
-  const moveVisualCaret = useCallback((index) => {
-    if (!caretRef.current) return;
-    const container = charRefs.current[0]?.parentNode;
-    if (!container) return;
-
-    const containerRect = container.getBoundingClientRect();
-    const i = Math.max(0, Math.min(index, charRefs.current.length));
-    const target = charRefs.current[i];
-
-    if (target) {
-      const rect = target.getBoundingClientRect();
-      caretRef.current.style.left = `${rect.left - containerRect.left}px`;
-      caretRef.current.style.top = `${rect.top - containerRect.top}px`;
-    }
-  }, []);
-
-  // ⏲ Timer
+  
+  // ---------- timer ----------
   useEffect(() => {
     if (!started || finished) return;
-
     timerRef.current = setInterval(() => {
       setTime((t) => {
         if (t <= 1) {
@@ -100,11 +108,10 @@ function TestArea() {
         return t - 1;
       });
     }, 1000);
-
     return () => clearInterval(timerRef.current);
   }, [started, finished]);
 
-  // 📊 Update WPM & Accuracy
+  // ---------- stats ----------
   useEffect(() => {
     const now = finished && finishTimeRef.current ? finishTimeRef.current : Date.now();
     const elapsedSec = startTimeRef.current
@@ -115,45 +122,41 @@ function TestArea() {
     const correct = input.split("").filter((ch, i) => ch === text[i]).length;
     const correctUser = Math.max(0, correct - autoInsertedRef.current);
 
-    const acc = typedUser > 0 ? (100 * correctUser / typedUser) : 100;
+    const acc = typedUser > 0 ? (100 * correctUser) / typedUser : 100;
     const wpmCalc = elapsedSec > 0 ? (correctUser / 5) / (elapsedSec / 60) : 0;
 
     setAccuracy(acc.toFixed(1));
     setWpm(wpmCalc.toFixed(1));
   }, [input, text, finished]);
 
-  // ✅ Finish when typed to end
+  // ---------- finish when end reached ----------
   useEffect(() => {
-    if (!finished && cursor >= text.length) {
+    if (!finished && text && input.length >= text.length) {
       clearInterval(timerRef.current);
       setFinished(true);
       if (!finishTimeRef.current) finishTimeRef.current = Date.now();
     }
-  }, [cursor, finished, text.length]);
+  }, [input.length, text, finished]);
 
-  // ✅ Save AFTER stats ready
+  // ---------- save once finished ----------
   useEffect(() => {
-    if (finished) {
-      saveResult();
+    if (finished) saveResult();
+  }, [finished]);
+
+  // ---------- caret ----------
+  const moveVisualCaret = useCallback((index) => {
+    if (!caretRef.current) return;
+    const container = charRefs.current[0]?.parentNode;
+    if (!container) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const target = charRefs.current[index];
+    if (target) {
+      const rect = target.getBoundingClientRect();
+      caretRef.current.style.left = `${rect.left - containerRect.left}px`;
+      caretRef.current.style.top = `${rect.top - containerRect.top}px`;
     }
-  }, [finished, wpm, accuracy]);
-
-  const handleChange = (e) => {
-    if (!started) {
-      setStarted(true);
-      if (!startTimeRef.current) startTimeRef.current = Date.now();
-    }
-
-    const newVal = e.target.value;
-    const newPos = e.target.selectionStart;
-
-    setInput(newVal);
-    setCursor(newPos);
-
-    setIsIdle(false);
-    clearTimeout(idleTimer.current);
-    idleTimer.current = setTimeout(() => setIsIdle(true), 1500);
-  };
+  }, []);
 
   useEffect(() => {
     moveVisualCaret(cursor);
@@ -176,35 +179,51 @@ function TestArea() {
     startTimeRef.current = null;
     finishTimeRef.current = null;
     setIsIdle(true);
+    charRefs.current = [];
     inputRef.current?.focus();
   };
+
+  // ---------- UI ----------
+  if (selectedProblem === null) {
+    return (
+      <div className="app-container">
+        <nav className="navbar">
+          <div className="nav-logo">{user ? `⚙️ ${user.email}` : "⚙️ Loading..."}</div>
+          <div className="nav-links">
+            <a href="/problems">Problems</a>
+            <a href="/account">Account</a>
+            <a href="/leaderboards">Leaderboards</a>
+            {user && <button className="logout-btn" onClick={() => signOut(auth)}>Logout</button>}
+          </div>
+        </nav>
+        <div className="test-wrapper">
+          <div className="results fade-in">
+            <h2>Problem not found</h2>
+            <p>That problem id doesn’t exist. Go back to <a href="/problems">Problems</a>.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">
       <nav className="navbar">
         <div className="nav-logo">{user ? `⚙️ ${user.email}` : "⚙️ Loading..."}</div>
-
         <div className="nav-links">
-          <a href="https://www.linkedin.com/in/herbert-seto-0b199a376/?lipi=urn%3Ali%3Apage%3Ad_flagship3_people%3B56n7T9sXRO%2B99ukj%2BNW%2ByA%3D%3D">Problems</a>
+          <a href="/problems">Problems</a>
           <a href="/account">Account</a>
-          <a href="/leaderboard">Leaderboard</a>
+          <a href="/leaderboards">Leaderboards</a>
 
-          {user && (
-            <button className="logout-btn" onClick={() => signOut(auth)}>Logout</button>
-          )}
+          {user && <button className="logout-btn" onClick={() => signOut(auth)}>Logout</button>}
         </div>
       </nav>
 
       <div className="test-wrapper">
-
-        <select className="problem-select" onChange={changeProblem} value={selectedProblem.id}>
-          {problems.map(p => (
-            <option key={p.id} value={p.id}>{p.title}</option>
-          ))}
-        </select>
-
         {!finished ? (
           <>
+            <div className="problem-title-header">{selectedProblem?.title}</div>
+
             <div className="text-display">
               {text.split("").map((char, i) => (
                 <span
@@ -221,11 +240,24 @@ function TestArea() {
             <textarea
               ref={inputRef}
               value={input}
-              onChange={handleChange}
+              onChange={(e) => {
+                if (!started) {
+                  setStarted(true);
+                  if (!startTimeRef.current) startTimeRef.current = Date.now();
+                }
+                const newVal = e.target.value;
+                const newPos = e.target.selectionStart;
+                setInput(newVal);
+                setCursor(newPos);
+                setIsIdle(false);
+                clearTimeout(idleTimer.current);
+                idleTimer.current = setTimeout(() => setIsIdle(true), 1500);
+              }}
               onKeyDownCapture={(e) => {
                 const el = e.target;
                 const pos = el.selectionStart;
 
+                // TAB skip whitespace
                 if (e.key === "Tab" && pos === input.length) {
                   e.preventDefault();
                   const rest = text.slice(pos);
@@ -236,17 +268,21 @@ function TestArea() {
                     setInput(input + insert);
                     setCursor(newPos);
                     autoInsertedRef.current += insert.length;
-                    requestAnimationFrame(() => el.setSelectionRange(newPos, newPos));
+                    requestAnimationFrame(() =>
+                      el.setSelectionRange(newPos, newPos)
+                    );
                   }
                   return;
                 }
 
+                // ENTER keep indent
                 if (e.key === "Enter") {
                   e.preventDefault();
                   const value = el.value;
                   const lineStart = value.lastIndexOf("\n", pos - 1) + 1;
                   const line = value.slice(lineStart, pos);
-                  const indent = (line.match(/^(\s+)/) || ["", ""])[1];
+                  const indentMatch = line.match(/^(\s+)/);
+                  const indent = indentMatch ? indentMatch[1] : "";
                   const newVal = value.slice(0, pos) + "\n" + indent + value.slice(pos);
                   const newPos = pos + 1 + indent.length;
 
@@ -257,6 +293,10 @@ function TestArea() {
                   return;
                 }
               }}
+              onPaste={(e) => e.preventDefault()}
+              onCopy={(e) => e.preventDefault()}
+              onContextMenu={(e) => e.preventDefault()}
+              onDrop={(e) => e.preventDefault()}
               className="code-input"
               spellCheck={false}
               autoFocus

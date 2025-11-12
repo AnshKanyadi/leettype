@@ -1,0 +1,124 @@
+/* === Layout === */
+.home-container {
+  min-height: 100vh;
+  background: #0a0a0a;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 20px;
+}
+
+/* === Navbar === */
+.home-nav {
+  width: 100%;
+  max-width: 1100px;
+  padding: 25px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+
+/* Navbar buttons */
+.home-nav .home-btn {
+  margin-left: 16px;
+  font-size: 1rem;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 500;
+  text-decoration: none;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: white;
+  transition: 0.2s;
+}
+
+.home-nav .home-btn:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+/* === Hero Section === */
+.home-content {
+  flex: 1;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+.home-title {
+  font-size: 3.2rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.home-sub {
+  font-size: 1.25rem;
+  opacity: 0.8;
+  margin-bottom: 35px;
+}
+
+/* Buttons row */
+.home-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+/* Primary Button */
+.primary-btn {
+  padding: 14px 28px;
+  border-radius: 10px;
+  background: white;
+  color: black;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.primary-btn:hover {
+  background: #ddd;
+}
+
+/* Secondary Button */
+.secondary-btn {
+  padding: 14px 28px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.07);
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.secondary-btn:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+/* Credits */
+.credit {
+  font-size: 0.9rem;
+  opacity: 0.6;
+  margin-top: 30px;
+}
+
+.credit a {
+  color: #58a6ff;
+  text-decoration: none;
+}
+
+.credit a:hover {
+  text-decoration: underline;
+}

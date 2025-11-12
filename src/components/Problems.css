@@ -1,0 +1,65 @@
+.problems-container {
+  max-width: 900px;
+  margin: 100px auto;
+  padding: 2rem;
+  color: #fff;
+}
+
+.problems-container h2 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+}
+
+.problems-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.problem-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  backdrop-filter: blur(6px);
+  transition: 0.2s;
+}
+
+.problem-card:hover {
+  transform: translateY(-2px);
+  background: rgba(255,255,255,0.10);
+}
+
+.problem-left {
+  text-decoration: none;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.problem-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.problem-difficulty {
+  opacity: 0.7;
+  font-size: 0.9rem;
+}
+
+.leaderboard-btn {
+  font-size: 1.4rem;
+  text-decoration: none;
+  color: #3b82f6;
+  transition: 0.2s;
+}
+
+.leaderboard-btn:hover {
+  transform: scale(1.2);
+  color: #60a5fa;
+}
