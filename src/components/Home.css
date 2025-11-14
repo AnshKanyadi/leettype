@@ -1,16 +1,33 @@
-/* === Layout === */
+/* === Global Layout === */
 .home-container {
+  position: relative;
   min-height: 100vh;
+  overflow: hidden;
   background: #0a0a0a;
   color: white;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 0 20px;
+  animation: fadeIn 1s ease;
+}
+
+/* === Animated Gradient Background === */
+.animated-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(-45deg, #111827, #0f172a, #1e3a8a, #1e40af);
+  background-size: 400% 400%;
+  z-index: 0;
+  animation: gradientMove 10s ease infinite;
+  filter: blur(50px);
+  opacity: 0.5;
 }
 
 /* === Navbar === */
 .home-nav {
+  position: relative;
+  z-index: 2;
   width: 100%;
   max-width: 1100px;
   padding: 25px 0;
@@ -20,12 +37,15 @@
 }
 
 .logo {
-  font-size: 1.8rem;
+  font-size: 1.9rem;
   font-weight: 700;
   letter-spacing: -1px;
+  background: linear-gradient(90deg, #60a5fa, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-/* Navbar buttons */
+/* === Navbar Buttons === */
 .home-nav .home-btn {
   margin-left: 16px;
   font-size: 1rem;
@@ -33,18 +53,21 @@
   border-radius: 8px;
   font-weight: 500;
   text-decoration: none;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: white;
-  transition: 0.2s;
+  transition: all 0.25s ease;
 }
 
 .home-nav .home-btn:hover {
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
 }
 
 /* === Hero Section === */
 .home-content {
+  position: relative;
+  z-index: 2;
   flex: 1;
   max-width: 900px;
   display: flex;
@@ -52,21 +75,25 @@
   text-align: center;
   justify-content: center;
   padding: 60px 20px;
+  animation: fadeIn 1s ease;
 }
 
 .home-title {
-  font-size: 3.2rem;
+  font-size: 3.5rem;
   font-weight: 700;
   margin-bottom: 12px;
+  line-height: 1.2;
+  animation: slideUp 1s ease forwards;
 }
 
 .home-sub {
   font-size: 1.25rem;
-  opacity: 0.8;
+  opacity: 0.85;
   margin-bottom: 35px;
+  animation: floatText 3s ease-in-out infinite;
 }
 
-/* Buttons row */
+/* === Buttons Row === */
 .home-buttons {
   display: flex;
   gap: 16px;
@@ -78,47 +105,122 @@
 .primary-btn {
   padding: 14px 28px;
   border-radius: 10px;
-  background: white;
-  color: black;
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  color: white;
   font-size: 1.1rem;
   font-weight: 600;
   text-decoration: none;
-  transition: 0.2s;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+  transition: all 0.3s ease;
 }
 
 .primary-btn:hover {
-  background: #ddd;
+  transform: translateY(-2px);
+  box-shadow: 0 0 18px rgba(59, 130, 246, 0.7);
 }
 
 /* Secondary Button */
 .secondary-btn {
   padding: 14px 28px;
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.2);
-  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.07);
   color: white;
   font-size: 1.1rem;
   font-weight: 500;
   text-decoration: none;
-  transition: 0.2s;
+  transition: all 0.25s ease;
 }
 
 .secondary-btn:hover {
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
 }
 
-/* Credits */
+/* === Credits === */
 .credit {
   font-size: 0.9rem;
   opacity: 0.6;
   margin-top: 30px;
+  animation: fadeInDelayed 1s ease forwards;
 }
 
 .credit a {
-  color: #58a6ff;
+  color: #60a5fa;
   text-decoration: none;
+  transition: 0.3s;
 }
 
 .credit a:hover {
+  color: #93c5fd;
   text-decoration: underline;
+}
+
+/* === Animations === */
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInDelayed {
+  0%, 50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes floatText {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* Utility classes */
+.fade-in {
+  animation: fadeIn 1s ease forwards;
+}
+
+.fade-in-delayed {
+  animation: fadeInDelayed 2s ease forwards;
+}
+
+.slide-up {
+  animation: slideUp 1.2s ease forwards;
+}
+
+.float-text {
+  animation: floatText 3s ease-in-out infinite;
 }
