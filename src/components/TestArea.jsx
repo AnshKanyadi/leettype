@@ -27,7 +27,14 @@ function TestArea() {
   const [accuracy, setAccuracy] = useState("100.0");
   const [isIdle, setIsIdle] = useState(true);
 
+  const [cheatDetected, setCheatDetected] = useState(false);
+  const [cheatReason, setCheatReason] = useState("");
+
   const totalTime = 120;
+  const MAX_WPM = 250;
+  const MIN_KEYSTROKE_MS = 30;
+  const PASTE_THRESHOLD_MS = 10;
+  
   const inputRef = useRef(null);
   const caretRef = useRef(null);
   const charRefs = useRef([]);
@@ -36,6 +43,10 @@ function TestArea() {
   const startTimeRef = useRef(null);
   const finishTimeRef = useRef(null);
   const autoInsertedRef = useRef(0);
+  const keystrokeTimesRef = useRef([]);
+  const lastInputLengthRef = useRef(0);
+  const lastKeystrokeRef = useRef(Date.now());
+  const suspiciousCountRef = useRef(0);
 
   useEffect(() => {
     async function loadPreferences() {
@@ -81,11 +92,60 @@ function TestArea() {
     setTimeout(() => inputRef.current?.focus(), 0);
   }, [id, selectedLanguage]);
 
+  function validateTypingPattern() {
+    const times = keystrokeTimesRef.current;
+    if (times.length < 10) return { valid: true };
+
+    const gaps = [];
+    for (let i = 1; i < times.length; i++) {
+      gaps.push(times[i] - times[i - 1]);
+    }
+
+    const avgGap = gaps.reduce((a, b) => a + b, 0) / gaps.length;
+    const variance = gaps.reduce((sum, g) => sum + Math.pow(g - avgGap, 2), 0) / gaps.length;
+    const stdDev = Math.sqrt(variance);
+
+    if (avgGap < MIN_KEYSTROKE_MS) {
+      return { valid: false, reason: "Typing speed exceeds human limits" };
+    }
+
+    if (stdDev < 5 && gaps.length > 20) {
+      return { valid: false, reason: "Robotic typing pattern detected" };
+    }
+
+    const superFastCount = gaps.filter(g => g < 15).length;
+    if (superFastCount > gaps.length * 0.3) {
+      return { valid: false, reason: "Too many impossibly fast keystrokes" };
+    }
+
+    return { valid: true };
+  }
+
   async function saveResult() {
     if (!user || !id) return;
   
     const wpmValue = Number(wpm);
     const accValue = Number(accuracy);
+
+    if (cheatDetected) {
+      console.log("⚠️ Cheat detected, not saving to leaderboard:", cheatReason);
+      return;
+    }
+
+    const validation = validateTypingPattern();
+    if (!validation.valid) {
+      setCheatDetected(true);
+      setCheatReason(validation.reason);
+      console.log("⚠️ Validation failed:", validation.reason);
+      return;
+    }
+
+    if (wpmValue > MAX_WPM) {
+      setCheatDetected(true);
+      setCheatReason(`WPM exceeds maximum allowed (${MAX_WPM})`);
+      return;
+    }
+
     try {
       await addDoc(collection(db, "userScores"), {
         uid: user.uid,
@@ -95,6 +155,7 @@ function TestArea() {
         wpm: wpmValue,
         accuracy: accValue,
         timestamp: Date.now(),
+        verified: true,
       });
 
       const leaderboardId = `leaderboard_${id}_${selectedLanguage}`;
@@ -131,6 +192,10 @@ function TestArea() {
   const handleLanguageChange = (langId) => {
     setSelectedLanguage(langId);
     localStorage.setItem("leettype-language", langId);
+    resetTest();
+  };
+
+  const resetTest = () => {
     setInput("");
     setCursor(0);
     setStarted(false);
@@ -138,9 +203,15 @@ function TestArea() {
     setTime(totalTime);
     setWpm("0.0");
     setAccuracy("100.0");
+    setCheatDetected(false);
+    setCheatReason("");
     autoInsertedRef.current = 0;
     startTimeRef.current = null;
     finishTimeRef.current = null;
+    keystrokeTimesRef.current = [];
+    lastInputLengthRef.current = 0;
+    lastKeystrokeRef.current = Date.now();
+    suspiciousCountRef.current = 0;
     setIsIdle(true);
     charRefs.current = [];
     setTimeout(() => inputRef.current?.focus(), 0);
@@ -215,19 +286,7 @@ function TestArea() {
   };
 
   const restartTest = () => {
-    setInput("");
-    setCursor(0);
-    setStarted(false);
-    setFinished(false);
-    setTime(totalTime);
-    setWpm("0.0");
-    setAccuracy("100.0");
-    autoInsertedRef.current = 0;
-    startTimeRef.current = null;
-    finishTimeRef.current = null;
-    setIsIdle(true);
-    charRefs.current = [];
-    inputRef.current?.focus();
+    resetTest();
   };
 
   if (selectedProblem === null) {
@@ -302,11 +361,37 @@ function TestArea() {
               ref={inputRef}
               value={input}
               onChange={(e) => {
+                const now = Date.now();
+                const newVal = e.target.value;
+                const charsAdded = newVal.length - lastInputLengthRef.current;
+                
+                if (charsAdded > 2 && !e.nativeEvent.inputType?.includes("insertLineBreak")) {
+                  setCheatDetected(true);
+                  setCheatReason("Copy-paste detected");
+                  suspiciousCountRef.current += 5;
+                }
+
+                if (charsAdded === 1) {
+                  const gap = now - lastKeystrokeRef.current;
+                  keystrokeTimesRef.current.push(now);
+                  
+                  if (gap < PASTE_THRESHOLD_MS && lastInputLengthRef.current > 0) {
+                    suspiciousCountRef.current += 1;
+                  }
+                  
+                  if (suspiciousCountRef.current > 15) {
+                    setCheatDetected(true);
+                    setCheatReason("Suspicious typing pattern");
+                  }
+                }
+
+                lastKeystrokeRef.current = now;
+                lastInputLengthRef.current = newVal.length;
+
                 if (!started) {
                   setStarted(true);
                   if (!startTimeRef.current) startTimeRef.current = Date.now();
                 }
-                const newVal = e.target.value;
                 const newPos = e.target.selectionStart;
                 setInput(newVal);
                 setCursor(newPos);
@@ -365,16 +450,29 @@ function TestArea() {
               <p>⏱ {time}s</p>
               <p>⚡ {wpm} wpm</p>
               <p>🎯 {accuracy}%</p>
+              {cheatDetected && <p className="cheat-indicator">⚠️ Flagged</p>}
             </div>
 
             <button className="restart-btn" onClick={restartTest}>Restart</button>
           </>
         ) : (
-          <div className="results fade-in">
-            <h2>✅ Finished!</h2>
-            <p>⚡ {wpm} WPM</p>
-            <p>🎯 {accuracy}% Accuracy</p>
-            <button onClick={restartTest}>Restart</button>
+          <div className={`results fade-in ${cheatDetected ? "cheat-warning" : ""}`}>
+            {cheatDetected ? (
+              <>
+                <h2>⚠️ Invalid Attempt</h2>
+                <p className="cheat-message">{cheatReason}</p>
+                <p className="cheat-info">This result was not saved to the leaderboard.</p>
+                <button onClick={restartTest}>Try Again</button>
+              </>
+            ) : (
+              <>
+                <h2>✅ Finished!</h2>
+                <p>⚡ {wpm} WPM</p>
+                <p>🎯 {accuracy}% Accuracy</p>
+                <p className="verified-badge">✓ Verified & Saved</p>
+                <button onClick={restartTest}>Restart</button>
+              </>
+            )}
           </div>
         )}
       </div>
