@@ -11,13 +11,11 @@ export default function AllLeaderboards() {
   const [search, setSearch] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState("all");
 
-  // Get unique categories
   const categories = useMemo(() => {
     const cats = [...new Set(problems.map((p) => p.category))];
     return cats.sort();
   }, []);
 
-  // Filter problems
   const filteredProblems = useMemo(() => {
     return problems.filter((p) => {
       const matchesSearch =
@@ -51,7 +49,6 @@ export default function AllLeaderboards() {
           Check who's topping the charts for each challenge.
         </p>
 
-        {/* Search and Filters */}
         <div className="search-filters">
           <input
             type="text"

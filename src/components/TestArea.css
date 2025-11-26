@@ -126,12 +126,10 @@ body {
   animation: blink 1s step-start infinite;
 }
 
-/* 🔵 Solid when typing */
 .solid {
   animation: none;
 }
 
-/* ✨ Fade Animations */
 @keyframes blink {
   50% {
     opacity: 0;
@@ -151,7 +149,6 @@ body {
   transform: translateY(10px);
 }
 
-/* 🧮 Code Input Area */
 .code-input {
   display: block;
   margin-top: 2rem;
@@ -174,7 +171,6 @@ body {
   border-color: #3b82f6;
 }
 
-/* 🧾 Stats */
 .stats {
   margin-top: 1.5rem;
   font-size: 1.1rem;
@@ -185,7 +181,6 @@ body {
   color: #9ca3af;
 }
 
-/* 🏁 Results Screen */
 .results {
   text-align: center;
   margin-top: 2rem;
@@ -238,7 +233,6 @@ body {
   transform: translateY(-1px);
 }
 
-/* 🔤 Generic input (unused but kept for compatibility) */
 input {
   display: block;
   margin-top: 2rem;
@@ -315,7 +309,6 @@ input:focus {
   background: #1d4ed8;
 }
 
-/* ========== Language Selector ========== */
 .language-selector {
   display: flex;
   gap: 8px;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { db } from "../firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { LANGUAGES } from "./problemsData";
 import "./Leaderboard.css";
 
@@ -17,17 +17,33 @@ export default function LeaderboardProblem() {
       try {
         let colRef;
         if (selectedLanguage === "all") {
-          // Load from the general leaderboard (backwards compatible)
           colRef = collection(db, `leaderboard_${id}`);
         } else {
-          // Load from language-specific leaderboard
           colRef = collection(db, `leaderboard_${id}_${selectedLanguage}`);
         }
-        
+
         const snapshot = await getDocs(colRef);
-        const data = snapshot.docs.map((doc) => doc.data());
-        data.sort((a, b) => b.wpm - a.wpm); // sort by best WPM
-        setScores(data);
+        const data = snapshot.docs.map((d) => d.data());
+        data.sort((a, b) => b.wpm - a.wpm);
+
+        const scoresWithUsernames = await Promise.all(
+          data.map(async (s) => {
+            if (s.uid) {
+              try {
+                const userDoc = await getDoc(doc(db, "users", s.uid));
+                if (userDoc.exists()) {
+                  const userData = userDoc.data();
+                  return { ...s, displayName: userData.username || null };
+                }
+              } catch (e) {
+                console.error("Error fetching user:", e);
+              }
+            }
+            return s;
+          })
+        );
+
+        setScores(scoresWithUsernames);
       } catch (err) {
         console.error("Error loading leaderboard:", err);
         setScores([]);
@@ -41,6 +57,12 @@ export default function LeaderboardProblem() {
   const getLangName = (langId) => {
     const lang = LANGUAGES.find((l) => l.id === langId);
     return lang ? lang.icon : langId?.toUpperCase() || "?";
+  };
+
+  const getDisplayName = (s) => {
+    if (s.displayName) return `@${s.displayName}`;
+    if (s.email) return s.email.split("@")[0];
+    return "Anonymous";
   };
 
   if (loading) {
@@ -61,7 +83,6 @@ export default function LeaderboardProblem() {
         </Link>
         <h2>🏆 Leaderboard — {id}</h2>
 
-        {/* Language Filter */}
         <div className="language-filter">
           <button
             className={`filter-btn ${selectedLanguage === "all" ? "active" : ""}`}
@@ -101,7 +122,9 @@ export default function LeaderboardProblem() {
                     {i === 2 && "🥉"}
                     {i > 2 && `#${i + 1}`}
                   </span>
-                  <span className="entry-email">{s.email}</span>
+                  <span className={`entry-name ${s.displayName ? "has-username" : ""}`}>
+                    {getDisplayName(s)}
+                  </span>
                 </div>
                 <div className="entry-right">
                   {s.language && (

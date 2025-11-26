@@ -20,7 +20,6 @@
   -webkit-text-fill-color: transparent;
 }
 
-/* ========== Search & Filters ========== */
 .search-filters {
   margin-bottom: 1.5rem;
 }
@@ -86,7 +85,6 @@
   text-align: right;
 }
 
-/* ========== Problems List ========== */
 .problems-list {
   display: flex;
   flex-direction: column;
@@ -188,7 +186,6 @@
   color: #60a5fa;
 }
 
-/* ========== No Results ========== */
 .no-results {
   text-align: center;
   padding: 3rem;
@@ -212,7 +209,6 @@
   box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
 }
 
-/* ========== Navbar (shared) ========== */
 .navbar {
   width: 100%;
   background-color: rgba(22, 27, 34, 0.95);

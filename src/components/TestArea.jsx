@@ -9,7 +9,7 @@ import { doc, setDoc, collection, addDoc, getDoc } from "firebase/firestore";
 
 function TestArea() {
   const { user } = useAuth();
-  const { id } = useParams(); // /app/:id
+  const { id } = useParams();
 
   const [selectedProblem, setSelectedProblem] = useState(null);
   const [selectedLanguage, setSelectedLanguage] = useState(() => {
@@ -37,7 +37,26 @@ function TestArea() {
   const finishTimeRef = useRef(null);
   const autoInsertedRef = useRef(0);
 
-  // ---------- load problem from URL and reset ----------
+  useEffect(() => {
+    async function loadPreferences() {
+      if (!user) return;
+      try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          const prefs = userDoc.data();
+          if (prefs.preferredLanguage) {
+            setSelectedLanguage(prefs.preferredLanguage);
+            localStorage.setItem("leettype-language", prefs.preferredLanguage);
+          }
+        }
+      } catch (err) {
+        console.error("Error loading preferences:", err);
+      }
+    }
+    loadPreferences();
+  }, [user]);
+
+
   useEffect(() => {
     const p = problems.find((x) => x.id === id);
     setSelectedProblem(p || null);
@@ -47,7 +66,6 @@ function TestArea() {
     } else {
       setText("");
     }
-    // full reset
     setInput("");
     setCursor(0);
     setStarted(false);
@@ -60,20 +78,15 @@ function TestArea() {
     finishTimeRef.current = null;
     setIsIdle(true);
     charRefs.current = [];
-    // focus after a tick
     setTimeout(() => inputRef.current?.focus(), 0);
   }, [id, selectedLanguage]);
 
-  // ---------- save result ----------
   async function saveResult() {
     if (!user || !id) return;
   
     const wpmValue = Number(wpm);
     const accValue = Number(accuracy);
-    console.log("Saving result for:", id, selectedLanguage, wpmValue, accValue);
-  
     try {
-      // Save attempt history (includes language)
       await addDoc(collection(db, "userScores"), {
         uid: user.uid,
         email: user.email,
@@ -83,26 +96,22 @@ function TestArea() {
         accuracy: accValue,
         timestamp: Date.now(),
       });
-  
-      // Per-problem + language leaderboard (best only per language)
+
       const leaderboardId = `leaderboard_${id}_${selectedLanguage}`;
       const userRef = doc(db, leaderboardId, user.uid);
       const prev = await getDoc(userRef);
   
       if (!prev.exists() || wpmValue > prev.data().wpm) {
         await setDoc(userRef, {
+          uid: user.uid,
           email: user.email,
           language: selectedLanguage,
           wpm: wpmValue,
           accuracy: accValue,
           updatedAt: Date.now(),
         });
-        console.log("Leaderboard updated for:", id, selectedLanguage);
-      } else {
-        console.log("Did not beat previous WPM, skipping update.");
       }
 
-      // Also update the "all languages" leaderboard for backwards compatibility
       const allLangRef = doc(db, `leaderboard_${id}`, user.uid);
       const prevAll = await getDoc(allLangRef);
       if (!prevAll.exists() || wpmValue > prevAll.data().wpm) {
@@ -119,11 +128,9 @@ function TestArea() {
     }
   }
 
-  // ---------- language change handler ----------
   const handleLanguageChange = (langId) => {
     setSelectedLanguage(langId);
     localStorage.setItem("leettype-language", langId);
-    // Reset the test when language changes
     setInput("");
     setCursor(0);
     setStarted(false);
@@ -138,8 +145,7 @@ function TestArea() {
     charRefs.current = [];
     setTimeout(() => inputRef.current?.focus(), 0);
   };
-  
-  // ---------- timer ----------
+
   useEffect(() => {
     if (!started || finished) return;
     timerRef.current = setInterval(() => {
@@ -156,7 +162,6 @@ function TestArea() {
     return () => clearInterval(timerRef.current);
   }, [started, finished]);
 
-  // ---------- stats ----------
   useEffect(() => {
     const now = finished && finishTimeRef.current ? finishTimeRef.current : Date.now();
     const elapsedSec = startTimeRef.current
@@ -174,7 +179,6 @@ function TestArea() {
     setWpm(wpmCalc.toFixed(1));
   }, [input, text, finished]);
 
-  // ---------- finish when end reached ----------
   useEffect(() => {
     if (!finished && text && input.length >= text.length) {
       clearInterval(timerRef.current);
@@ -183,12 +187,10 @@ function TestArea() {
     }
   }, [input.length, text, finished]);
 
-  // ---------- save once finished ----------
   useEffect(() => {
     if (finished) saveResult();
   }, [finished]);
 
-  // ---------- caret ----------
   const moveVisualCaret = useCallback((index) => {
     if (!caretRef.current) return;
     const container = charRefs.current[0]?.parentNode;
@@ -228,7 +230,6 @@ function TestArea() {
     inputRef.current?.focus();
   };
 
-  // ---------- UI ----------
   if (selectedProblem === null) {
     return (
       <div className="app-container">
@@ -317,7 +318,6 @@ function TestArea() {
                 const el = e.target;
                 const pos = el.selectionStart;
 
-                // TAB skip whitespace
                 if (e.key === "Tab" && pos === input.length) {
                   e.preventDefault();
                   const rest = text.slice(pos);
@@ -335,7 +335,6 @@ function TestArea() {
                   return;
                 }
 
-                // ENTER keep indent
                 if (e.key === "Enter") {
                   e.preventDefault();
                   const value = el.value;
