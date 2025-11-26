@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import "./TestArea.css";
-import { problems } from "./problemsData";
+import { problems, LANGUAGES, getSolution, getAvailableLanguages } from "./problemsData";
 import { auth, db } from "../firebase";
 import { signOut } from "firebase/auth";
 import { useAuth } from "../context/AuthContext";
@@ -12,6 +12,10 @@ function TestArea() {
   const { id } = useParams(); // /app/:id
 
   const [selectedProblem, setSelectedProblem] = useState(null);
+  const [selectedLanguage, setSelectedLanguage] = useState(() => {
+    return localStorage.getItem("leettype-language") || "javascript";
+  });
+  const [availableLanguages, setAvailableLanguages] = useState(LANGUAGES);
   const [text, setText] = useState("");
 
   const [input, setInput] = useState("");
@@ -37,7 +41,12 @@ function TestArea() {
   useEffect(() => {
     const p = problems.find((x) => x.id === id);
     setSelectedProblem(p || null);
-    setText(p?.solution || "");
+    if (p) {
+      setAvailableLanguages(getAvailableLanguages(p));
+      setText(getSolution(p, selectedLanguage));
+    } else {
+      setText("");
+    }
     // full reset
     setInput("");
     setCursor(0);
@@ -53,7 +62,7 @@ function TestArea() {
     charRefs.current = [];
     // focus after a tick
     setTimeout(() => inputRef.current?.focus(), 0);
-  }, [id]);
+  }, [id, selectedLanguage]);
 
   // ---------- save result ----------
   async function saveResult() {
@@ -61,38 +70,74 @@ function TestArea() {
   
     const wpmValue = Number(wpm);
     const accValue = Number(accuracy);
-    console.log("Saving result for:", id, wpmValue, accValue);
+    console.log("Saving result for:", id, selectedLanguage, wpmValue, accValue);
   
     try {
-      // Save attempt history
+      // Save attempt history (includes language)
       await addDoc(collection(db, "userScores"), {
         uid: user.uid,
         email: user.email,
         problemId: id,
+        language: selectedLanguage,
         wpm: wpmValue,
         accuracy: accValue,
         timestamp: Date.now(),
       });
   
-      // Per-problem leaderboard (best only)
-      const userRef = doc(db, `leaderboard_${id}`, user.uid);
+      // Per-problem + language leaderboard (best only per language)
+      const leaderboardId = `leaderboard_${id}_${selectedLanguage}`;
+      const userRef = doc(db, leaderboardId, user.uid);
       const prev = await getDoc(userRef);
   
       if (!prev.exists() || wpmValue > prev.data().wpm) {
         await setDoc(userRef, {
           email: user.email,
+          language: selectedLanguage,
           wpm: wpmValue,
           accuracy: accValue,
           updatedAt: Date.now(),
         });
-        console.log("Leaderboard updated for:", id);
+        console.log("Leaderboard updated for:", id, selectedLanguage);
       } else {
         console.log("Did not beat previous WPM, skipping update.");
+      }
+
+      // Also update the "all languages" leaderboard for backwards compatibility
+      const allLangRef = doc(db, `leaderboard_${id}`, user.uid);
+      const prevAll = await getDoc(allLangRef);
+      if (!prevAll.exists() || wpmValue > prevAll.data().wpm) {
+        await setDoc(allLangRef, {
+          email: user.email,
+          language: selectedLanguage,
+          wpm: wpmValue,
+          accuracy: accValue,
+          updatedAt: Date.now(),
+        });
       }
     } catch (err) {
       console.error("❌ Error saving result:", err);
     }
   }
+
+  // ---------- language change handler ----------
+  const handleLanguageChange = (langId) => {
+    setSelectedLanguage(langId);
+    localStorage.setItem("leettype-language", langId);
+    // Reset the test when language changes
+    setInput("");
+    setCursor(0);
+    setStarted(false);
+    setFinished(false);
+    setTime(totalTime);
+    setWpm("0.0");
+    setAccuracy("100.0");
+    autoInsertedRef.current = 0;
+    startTimeRef.current = null;
+    finishTimeRef.current = null;
+    setIsIdle(true);
+    charRefs.current = [];
+    setTimeout(() => inputRef.current?.focus(), 0);
+  };
   
   // ---------- timer ----------
   useEffect(() => {
@@ -223,6 +268,21 @@ function TestArea() {
         {!finished ? (
           <>
             <div className="problem-title-header">{selectedProblem?.title}</div>
+
+            {/* Language Selector */}
+            <div className="language-selector">
+              {availableLanguages.map((lang) => (
+                <button
+                  key={lang.id}
+                  className={`lang-btn ${selectedLanguage === lang.id ? "active" : ""}`}
+                  onClick={() => handleLanguageChange(lang.id)}
+                  disabled={started && !finished}
+                  title={started && !finished ? "Finish or restart to switch language" : lang.name}
+                >
+                  {lang.icon}
+                </button>
+              ))}
+            </div>
 
             <div className="text-display">
               {text.split("").map((char, i) => (

@@ -13,7 +13,7 @@ export default function Login() {
   const loginEmail = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/app");
+      navigate("/problems");
     } catch (err) {
       alert(err.message);
     }
@@ -22,7 +22,7 @@ export default function Login() {
   const loginGoogle = async () => {
     try {
       await signInWithPopup(auth, google);
-      navigate("/app");
+      navigate("/problems");
     } catch (err) {
       alert(err.message);
     }

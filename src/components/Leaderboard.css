@@ -1,65 +1,211 @@
+.leaderboard-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0a0f1a, #0e141f);
+  padding: 2rem;
+}
+
 .leaderboard-container {
-  max-width: 600px;
-  margin: 140px auto;
+  max-width: 650px;
+  margin: 80px auto;
   padding: 2.5rem;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
   color: #ffffff;
-  text-align: center;
   font-family: "Inter", system-ui, sans-serif;
-  animation: fadeIn 0.6s ease forwards;
+  animation: fadeIn 0.5s ease forwards;
+}
+
+/* Back Button */
+.back-btn {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+  color: #60a5fa;
+  transform: translateX(-3px);
 }
 
 /* Title */
 .leaderboard-container h2 {
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: 600;
-  margin-bottom: 1.8rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
   background: linear-gradient(90deg, #60a5fa, #a78bfa);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-/* Leaderboard entry row */
+/* ========== Language Filter ========== */
+.language-filter {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: "Fira Code", monospace;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e6edf3;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.filter-btn.active {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border-color: #3b82f6;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
+}
+
+/* ========== Leaderboard List ========== */
+.leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .leaderboard-entry {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 14px 18px;
-  margin-bottom: 8px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.03);
   border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.1);
-  transition: transform 0.15s ease, background 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.2s ease;
 }
 
 .leaderboard-entry:hover {
-  transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateX(4px);
 }
 
-/* Rank */
+/* Top 3 special styling */
+.leaderboard-entry.rank-1 {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
+  border-color: rgba(255, 215, 0, 0.3);
+}
+
+.leaderboard-entry.rank-2 {
+  background: linear-gradient(135deg, rgba(192, 192, 192, 0.1), rgba(192, 192, 192, 0.05));
+  border-color: rgba(192, 192, 192, 0.3);
+}
+
+.leaderboard-entry.rank-3 {
+  background: linear-gradient(135deg, rgba(205, 127, 50, 0.1), rgba(205, 127, 50, 0.05));
+  border-color: rgba(205, 127, 50, 0.3);
+}
+
+.entry-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .leaderboard-rank {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #60a5fa;
+  min-width: 40px;
 }
 
-/* Score text */
-.leaderboard-data {
+.entry-email {
   font-size: 0.95rem;
-  opacity: 0.85;
+  color: rgba(255, 255, 255, 0.9);
 }
 
-.leaderboard-email {
-  font-weight: 500;
+.entry-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
-/* Fade-in animation */
+.entry-lang {
+  padding: 3px 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  border-radius: 4px;
+  font-family: "Fira Code", monospace;
+}
+
+.entry-wpm {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #22c55e;
+}
+
+.entry-acc {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ========== No Scores ========== */
+.no-scores {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.no-scores p {
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.try-btn {
+  display: inline-block;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.try-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+}
+
+/* ========== Loading ========== */
+.loading-spinner {
+  text-align: center;
+  padding: 3rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.1rem;
+}
+
+/* ========== Animation ========== */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

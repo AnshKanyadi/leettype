@@ -1,82 +1,237 @@
 .all-leaderboards-page {
-    background: linear-gradient(180deg, #0a0f1a, #0e141f);
-    min-height: 100vh;
-    color: #f5f5f5;
-    font-family: "Inter", sans-serif;
-  }
-  
-  .leaderboards-wrapper {
-    max-width: 900px;
-    margin: 120px auto;
-    padding: 2rem;
-    text-align: center;
-  }
-  
-  .leaderboards-wrapper h2 {
-    font-size: 2rem;
-    font-weight: 600;
-    background: linear-gradient(90deg, #60a5fa, #3b82f6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  
-  .subtitle {
-    opacity: 0.8;
-    margin-bottom: 2rem;
-    font-size: 1rem;
-  }
-  
-  .leaderboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
-  }
-  
-  .leaderboard-card {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 1.5rem;
-    text-align: left;
-    text-decoration: none;
-    color: #f5f5f5;
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-  }
-  
-  .leaderboard-card:hover {
-    transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.08);
-    border-color: #3b82f6;
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
-  }
-  
-  .card-content h3 {
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .difficulty-tag {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    text-transform: capitalize;
-  }
-  
-  .difficulty-tag.easy {
-    background-color: rgba(34, 197, 94, 0.15);
-    color: #22c55e;
-  }
-  
-  .difficulty-tag.medium {
-    background-color: rgba(234, 179, 8, 0.15);
-    color: #eab308;
-  }
-  
-  .difficulty-tag.hard {
-    background-color: rgba(239, 68, 68, 0.15);
-    color: #ef4444;
-  }
-  
+  background: linear-gradient(180deg, #0a0f1a, #0e141f);
+  min-height: 100vh;
+  color: #f5f5f5;
+  font-family: "Inter", sans-serif;
+}
+
+.leaderboards-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+  padding-top: 100px;
+  text-align: center;
+}
+
+.leaderboards-wrapper h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #60a5fa, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  opacity: 0.7;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+}
+
+/* ========== Search & Filters ========== */
+.search-filters {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.search-input {
+  width: 100%;
+  padding: 14px 18px;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  color: #fff;
+  outline: none;
+  transition: all 0.2s ease;
+  margin-bottom: 12px;
+}
+
+.search-input:focus {
+  border-color: #3b82f6;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.filter-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.filter-select {
+  flex: 1;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  color: #fff;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-select:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.filter-select:focus {
+  border-color: #3b82f6;
+}
+
+.filter-select option {
+  background: #1a1f2e;
+  color: #fff;
+}
+
+.results-count {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: right;
+}
+
+/* ========== Leaderboard Grid ========== */
+.leaderboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.2rem;
+}
+
+.leaderboard-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: left;
+  text-decoration: none;
+  color: #f5f5f5;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.leaderboard-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #3b82f6;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+}
+
+.card-content h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.7rem;
+  font-weight: 600;
+}
+
+.difficulty-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+
+.difficulty-tag.easy {
+  background-color: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+
+.difficulty-tag.medium {
+  background-color: rgba(234, 179, 8, 0.15);
+  color: #eab308;
+}
+
+.difficulty-tag.hard {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.category-text {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ========== No Results ========== */
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.no-results button {
+  margin-top: 1rem;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.no-results button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+/* ========== Navbar ========== */
+.navbar {
+  width: 100%;
+  background-color: rgba(22, 27, 34, 0.95);
+  border-bottom: 1px solid #30363d;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0.8rem 2rem;
+  font-size: 1rem;
+  position: fixed;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.nav-logo {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #3b82f6;
+  justify-self: start;
+}
+
+.nav-links {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.nav-links a {
+  color: #e6edf3;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.nav-links a:hover {
+  color: #3b82f6;
+}
+
+.logout-btn {
+  background: #2563eb;
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.logout-btn:hover {
+  background: #1d4ed8;
+}

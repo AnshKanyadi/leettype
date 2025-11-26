@@ -314,3 +314,50 @@ input:focus {
 .logout-btn:hover {
   background: #1d4ed8;
 }
+
+/* ========== Language Selector ========== */
+.language-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 1.2rem;
+  justify-content: center;
+}
+
+.lang-btn {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: "Fira Code", monospace;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lang-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e6edf3;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.lang-btn.active {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border-color: #3b82f6;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
+}
+
+.lang-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.problem-title-header {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+  color: #e6edf3;
+  text-align: center;
+}
