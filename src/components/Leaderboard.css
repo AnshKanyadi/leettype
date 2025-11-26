@@ -207,3 +207,154 @@
     transform: translateY(0);
   }
 }
+
+.leaderboard-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.leaderboard-title-row h2 {
+  margin-bottom: 0;
+}
+
+.pro-badge-small {
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  border-radius: 100px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: white;
+}
+
+.leaderboard-paywall {
+  position: relative;
+  margin-top: 1rem;
+}
+
+.paywall-blur {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  filter: blur(8px);
+  pointer-events: none;
+  user-select: none;
+}
+
+.blurred-entry {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.blur-rank {
+  min-width: 40px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.blur-name {
+  flex: 1;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: monospace;
+}
+
+.blur-wpm {
+  color: rgba(255, 255, 255, 0.5);
+  font-family: monospace;
+}
+
+.paywall-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, transparent, rgba(10, 15, 26, 0.95));
+}
+
+.paywall-overlay .paywall-content {
+  text-align: center;
+  padding: 2rem;
+}
+
+.lock-icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.paywall-overlay h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.paywall-overlay p {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.unlock-btn {
+  display: inline-block;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.4);
+}
+
+.unlock-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(59, 130, 246, 0.5);
+}
+
+.your-rank-teaser {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 12px;
+}
+
+.teaser-icon {
+  font-size: 1.2rem;
+}
+
+.teaser-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
+}
+
+.blurred-text {
+  filter: blur(4px);
+  background: rgba(255, 255, 255, 0.3);
+  padding: 0 8px;
+  border-radius: 4px;
+}
+
+.teaser-link {
+  color: #60a5fa;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.teaser-link:hover {
+  text-decoration: underline;
+}

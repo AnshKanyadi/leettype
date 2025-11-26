@@ -2,12 +2,15 @@ import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { problems, LANGUAGES, getAvailableLanguages } from "./problemsData";
 import { useAuth } from "../context/AuthContext";
+import { useSubscription } from "../context/SubscriptionContext";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
+import { AdBanner, InlineAd } from "./AdBanner";
 import "./Problems.css";
 
 export default function Problems() {
   const { user } = useAuth();
+  const { isPro, planName } = useSubscription();
   const [search, setSearch] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -32,12 +35,19 @@ export default function Problems() {
 
   return (
     <div className="problems-page">
-      <nav className="navbar">
-        <div className="nav-logo">⚙️ {user?.email || "LeetType"}</div>
+      <nav className="problems-nav">
+        <Link to="/" className="nav-brand">
+          <span>⌨️</span>
+          <span className="brand-text">LeetType</span>
+          {isPro && <span className="pro-tag">Pro</span>}
+        </Link>
         <div className="nav-links">
-          <a href="/problems">Problems</a>
-          <a href="/account">Account</a>
-          <a href="/leaderboards">Leaderboards</a>
+          <Link to="/problems">Problems</Link>
+          {isPro && <Link to="/analytics">Analytics</Link>}
+          {isPro && <Link to="/achievements">Achievements</Link>}
+          <Link to="/account">Account</Link>
+          <Link to="/leaderboards">Leaderboards</Link>
+          {!isPro && <Link to="/pricing" className="nav-upgrade">Upgrade</Link>}
           {user && (
             <button className="logout-btn" onClick={() => signOut(auth)}>
               Logout
@@ -47,7 +57,10 @@ export default function Problems() {
       </nav>
 
       <div className="problems-container">
-        <h2>📚 All Problems</h2>
+        <div className="problems-header">
+          <h2>📚 All Problems</h2>
+          <span className="problem-count">{problems.length} problems</span>
+        </div>
 
         <div className="search-filters">
           <input
@@ -89,33 +102,45 @@ export default function Problems() {
           </p>
         </div>
 
+        {!isPro && filteredProblems.length > 5 && (
+          <InlineAd />
+        )}
+
         <div className="problems-list">
-          {filteredProblems.map((p) => {
+          {filteredProblems.map((p, index) => {
             const langs = getAvailableLanguages(p);
             return (
-              <div key={p.id} className="problem-card">
-                <Link to={`/app/${p.id}`} className="problem-left">
-                  <span className="problem-title">{p.title}</span>
-                  <div className="problem-meta">
-                    <span
-                      className={`difficulty-badge ${p.difficulty?.toLowerCase()}`}
-                    >
-                      {p.difficulty || "Medium"}
-                    </span>
-                    <span className="category-badge">{p.category}</span>
-                  </div>
-                  <div className="lang-badges">
-                    {langs.map((lang) => (
-                      <span key={lang.id} className="lang-badge">
-                        {lang.icon}
+              <div key={p.id}>
+                <div className="problem-card">
+                  <Link to={`/app/${p.id}`} className="problem-left">
+                    <span className="problem-title">{p.title}</span>
+                    <div className="problem-meta">
+                      <span
+                        className={`difficulty-badge ${p.difficulty?.toLowerCase()}`}
+                      >
+                        {p.difficulty || "Medium"}
                       </span>
-                    ))}
-                  </div>
-                </Link>
+                      <span className="category-badge">{p.category}</span>
+                    </div>
+                    <div className="lang-badges">
+                      {langs.map((lang) => (
+                        <span key={lang.id} className="lang-badge">
+                          {lang.icon}
+                        </span>
+                      ))}
+                    </div>
+                  </Link>
 
-                <Link to={`/leaderboard/${p.id}`} className="leaderboard-btn">
-                  🏆
-                </Link>
+                  <Link to={`/leaderboard/${p.id}`} className="leaderboard-btn">
+                    🏆
+                  </Link>
+                </div>
+
+                {!isPro && (index + 1) % 15 === 0 && index < filteredProblems.length - 1 && (
+                  <div className="ad-break">
+                    <InlineAd />
+                  </div>
+                )}
               </div>
             );
           })}
@@ -136,6 +161,8 @@ export default function Problems() {
           )}
         </div>
       </div>
+
+      {!isPro && <AdBanner position="bottom" size="leaderboard" />}
     </div>
   );
 }

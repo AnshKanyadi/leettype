@@ -1,0 +1,345 @@
+.ad-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0;
+}
+
+.ad-container.bottom {
+  margin-top: auto;
+}
+
+.ad-container.top {
+  margin-bottom: 1rem;
+}
+
+.ad-placeholder {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.05));
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ad-leaderboard .ad-placeholder {
+  width: 728px;
+  max-width: 100%;
+  height: 90px;
+}
+
+.ad-rectangle .ad-placeholder {
+  width: 300px;
+  height: 250px;
+}
+
+.ad-banner .ad-placeholder {
+  width: 468px;
+  max-width: 100%;
+  height: 60px;
+}
+
+.ad-skyscraper .ad-placeholder {
+  width: 160px;
+  height: 600px;
+}
+
+.ad-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.ad-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.3);
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.ad-promo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.promo-icon {
+  font-size: 1.5rem;
+}
+
+.promo-text {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.promo-text strong {
+  color: #60a5fa;
+}
+
+.promo-btn {
+  padding: 6px 16px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.promo-btn:hover {
+  transform: scale(1.05);
+}
+
+.sidebar-ad {
+  width: 100%;
+  padding: 1rem;
+}
+
+.sidebar-ad-inner {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.sidebar-ad-content {
+  margin-top: 0.75rem;
+}
+
+.sidebar-promo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.promo-emoji {
+  font-size: 2.5rem;
+}
+
+.sidebar-promo h4 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0;
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sidebar-promo p {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+.sidebar-promo-btn {
+  margin-top: 8px;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+
+.sidebar-promo-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
+
+.inline-ad {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+}
+
+.inline-ad-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.inline-ad p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.inline-ad a {
+  color: #60a5fa;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.inline-ad a:hover {
+  text-decoration: underline;
+}
+
+.interstitial-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.interstitial-content {
+  position: relative;
+  width: 90%;
+  max-width: 420px;
+  background: linear-gradient(180deg, #0f172a, #0a0f1a);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 2.5rem;
+  animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.interstitial-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.interstitial-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.interstitial-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.interstitial-promo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.promo-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.promo-icon-large {
+  font-size: 3rem;
+}
+
+.promo-header h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.promo-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.promo-list li {
+  padding: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 1rem;
+}
+
+.interstitial-cta {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.1rem;
+  border-radius: 14px;
+  transition: all 0.3s;
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+}
+
+.interstitial-cta:hover {
+  transform: scale(1.02);
+  box-shadow: 0 10px 40px rgba(59, 130, 246, 0.5);
+}
+
+.skip-btn {
+  margin-top: 0.5rem;
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.skip-btn:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+@media (max-width: 768px) {
+  .ad-promo {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ad-leaderboard .ad-placeholder {
+    height: auto;
+    min-height: 90px;
+  }
+
+  .interstitial-content {
+    padding: 2rem 1.5rem;
+  }
+}
+

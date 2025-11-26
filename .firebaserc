@@ -1,0 +1,13 @@
+{
+  "projects": {
+    "default": "leettype-32f64"
+  },
+  "targets": {},
+  "etags": {
+    "leettype-32f64": {
+      "extensionInstances": {
+        "firestore-stripe-payments": "f52bdd7b840845de9e0465ee7eae5940679bb414eeb03c68d6ac9a4e6147cdf9"
+      }
+    }
+  }
+}

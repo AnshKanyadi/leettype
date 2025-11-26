@@ -31,9 +31,7 @@ function TestArea() {
   const [cheatReason, setCheatReason] = useState("");
 
   const totalTime = 120;
-  const MAX_WPM = 250;
-  const MIN_KEYSTROKE_MS = 30;
-  const PASTE_THRESHOLD_MS = 10;
+  const MAX_WPM = 300;
   
   const inputRef = useRef(null);
   const caretRef = useRef(null);
@@ -43,10 +41,7 @@ function TestArea() {
   const startTimeRef = useRef(null);
   const finishTimeRef = useRef(null);
   const autoInsertedRef = useRef(0);
-  const keystrokeTimesRef = useRef([]);
   const lastInputLengthRef = useRef(0);
-  const lastKeystrokeRef = useRef(Date.now());
-  const suspiciousCountRef = useRef(0);
 
   useEffect(() => {
     async function loadPreferences() {
@@ -93,31 +88,6 @@ function TestArea() {
   }, [id, selectedLanguage]);
 
   function validateTypingPattern() {
-    const times = keystrokeTimesRef.current;
-    if (times.length < 10) return { valid: true };
-
-    const gaps = [];
-    for (let i = 1; i < times.length; i++) {
-      gaps.push(times[i] - times[i - 1]);
-    }
-
-    const avgGap = gaps.reduce((a, b) => a + b, 0) / gaps.length;
-    const variance = gaps.reduce((sum, g) => sum + Math.pow(g - avgGap, 2), 0) / gaps.length;
-    const stdDev = Math.sqrt(variance);
-
-    if (avgGap < MIN_KEYSTROKE_MS) {
-      return { valid: false, reason: "Typing speed exceeds human limits" };
-    }
-
-    if (stdDev < 5 && gaps.length > 20) {
-      return { valid: false, reason: "Robotic typing pattern detected" };
-    }
-
-    const superFastCount = gaps.filter(g => g < 15).length;
-    if (superFastCount > gaps.length * 0.3) {
-      return { valid: false, reason: "Too many impossibly fast keystrokes" };
-    }
-
     return { valid: true };
   }
 
@@ -208,10 +178,7 @@ function TestArea() {
     autoInsertedRef.current = 0;
     startTimeRef.current = null;
     finishTimeRef.current = null;
-    keystrokeTimesRef.current = [];
     lastInputLengthRef.current = 0;
-    lastKeystrokeRef.current = Date.now();
-    suspiciousCountRef.current = 0;
     setIsIdle(true);
     charRefs.current = [];
     setTimeout(() => inputRef.current?.focus(), 0);
@@ -293,7 +260,10 @@ function TestArea() {
     return (
       <div className="app-container">
         <nav className="navbar">
-          <div className="nav-logo">{user ? `⚙️ ${user.email}` : "⚙️ Loading..."}</div>
+          <a href="/" className="nav-logo">
+            <span>⌨️</span>
+            <span className="brand-text">LeetType</span>
+          </a>
           <div className="nav-links">
             <a href="/problems">Problems</a>
             <a href="/account">Account</a>
@@ -302,9 +272,10 @@ function TestArea() {
           </div>
         </nav>
         <div className="test-wrapper">
-          <div className="results fade-in">
-            <h2>Problem not found</h2>
-            <p>That problem id doesn’t exist. Go back to <a href="/problems">Problems</a>.</p>
+          <div className="problem-not-found fade-in">
+            <h2>😕 Problem Not Found</h2>
+            <p>That problem doesn't exist in our collection.</p>
+            <a href="/problems">Browse All Problems</a>
           </div>
         </div>
       </div>
@@ -314,12 +285,14 @@ function TestArea() {
   return (
     <div className="app-container">
       <nav className="navbar">
-        <div className="nav-logo">{user ? `⚙️ ${user.email}` : "⚙️ Loading..."}</div>
+        <a href="/" className="nav-logo">
+          <span>⌨️</span>
+          <span className="brand-text">LeetType</span>
+        </a>
         <div className="nav-links">
           <a href="/problems">Problems</a>
           <a href="/account">Account</a>
           <a href="/leaderboards">Leaderboards</a>
-
           {user && <button className="logout-btn" onClick={() => signOut(auth)}>Logout</button>}
         </div>
       </nav>
@@ -361,31 +334,14 @@ function TestArea() {
               ref={inputRef}
               value={input}
               onChange={(e) => {
-                const now = Date.now();
                 const newVal = e.target.value;
                 const charsAdded = newVal.length - lastInputLengthRef.current;
                 
-                if (charsAdded > 2 && !e.nativeEvent.inputType?.includes("insertLineBreak")) {
+                if (charsAdded > 5 && !e.nativeEvent.inputType?.includes("insertLineBreak")) {
                   setCheatDetected(true);
                   setCheatReason("Copy-paste detected");
-                  suspiciousCountRef.current += 5;
                 }
 
-                if (charsAdded === 1) {
-                  const gap = now - lastKeystrokeRef.current;
-                  keystrokeTimesRef.current.push(now);
-                  
-                  if (gap < PASTE_THRESHOLD_MS && lastInputLengthRef.current > 0) {
-                    suspiciousCountRef.current += 1;
-                  }
-                  
-                  if (suspiciousCountRef.current > 15) {
-                    setCheatDetected(true);
-                    setCheatReason("Suspicious typing pattern");
-                  }
-                }
-
-                lastKeystrokeRef.current = now;
                 lastInputLengthRef.current = newVal.length;
 
                 if (!started) {
