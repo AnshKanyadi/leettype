@@ -31,7 +31,7 @@ function TestArea() {
   const [cheatReason, setCheatReason] = useState("");
 
   const totalTime = 120;
-  const MAX_WPM = 300;
+  const MAX_WPM = 250;
   
   const inputRef = useRef(null);
   const caretRef = useRef(null);
@@ -41,7 +41,6 @@ function TestArea() {
   const startTimeRef = useRef(null);
   const finishTimeRef = useRef(null);
   const autoInsertedRef = useRef(0);
-  const lastInputLengthRef = useRef(0);
 
   useEffect(() => {
     async function loadPreferences() {
@@ -87,9 +86,6 @@ function TestArea() {
     setTimeout(() => inputRef.current?.focus(), 0);
   }, [id, selectedLanguage]);
 
-  function validateTypingPattern() {
-    return { valid: true };
-  }
 
   async function saveResult() {
     if (!user || !id) return;
@@ -97,22 +93,9 @@ function TestArea() {
     const wpmValue = Number(wpm);
     const accValue = Number(accuracy);
 
-    if (cheatDetected) {
-      console.log("⚠️ Cheat detected, not saving to leaderboard:", cheatReason);
-      return;
-    }
-
-    const validation = validateTypingPattern();
-    if (!validation.valid) {
-      setCheatDetected(true);
-      setCheatReason(validation.reason);
-      console.log("⚠️ Validation failed:", validation.reason);
-      return;
-    }
-
     if (wpmValue > MAX_WPM) {
       setCheatDetected(true);
-      setCheatReason(`WPM exceeds maximum allowed (${MAX_WPM})`);
+      setCheatReason(`WPM exceeds ${MAX_WPM} - score not saved`);
       return;
     }
 
@@ -178,7 +161,6 @@ function TestArea() {
     autoInsertedRef.current = 0;
     startTimeRef.current = null;
     finishTimeRef.current = null;
-    lastInputLengthRef.current = 0;
     setIsIdle(true);
     charRefs.current = [];
     setTimeout(() => inputRef.current?.focus(), 0);
@@ -335,14 +317,6 @@ function TestArea() {
               value={input}
               onChange={(e) => {
                 const newVal = e.target.value;
-                const charsAdded = newVal.length - lastInputLengthRef.current;
-                
-                if (charsAdded > 5 && !e.nativeEvent.inputType?.includes("insertLineBreak")) {
-                  setCheatDetected(true);
-                  setCheatReason("Copy-paste detected");
-                }
-
-                lastInputLengthRef.current = newVal.length;
 
                 if (!started) {
                   setStarted(true);
